@@ -7,7 +7,6 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-	"net/url"
 	"strings"
 )
 
@@ -122,7 +121,7 @@ func webhookPostHandler(w http.ResponseWriter, r *http.Request) {
 					if attachments != nil {
 						SendMessage(messaging.Sender.ID, "Oops! Cant do that yet")
 						fmt.Println("Attachment. Cannot process")
-					} else {
+					} else if messaging.Message.Text != "" {
 						SendMessage(messaging.Sender.ID, text)
 					}
 
@@ -136,13 +135,11 @@ func webhookPostHandler(w http.ResponseWriter, r *http.Request) {
 
 func callSendAPI(data []byte) {
 	accessToken := tk.AccessToken
-	v := url.Values{}
-	v.Set("?access_token", accessToken)
-
 	response, err := http.Post("https://graph.facebook.com/v2.6/me/messages?access_token="+accessToken, "application/json", bytes.NewBuffer(data))
 
 	if err != nil {
 		log.Printf("Error here!! %s", err)
+		panic(err)
 	}
 
 	res, _ := ioutil.ReadAll(response.Body)
@@ -161,6 +158,7 @@ func getUserProfile(userID string) string {
 
 	if err != nil {
 		fmt.Printf(">>ERROR ACCESSING THE USER PROFILE: %s<<\n\n", err)
+		panic(err)
 	}
 
 	defer response.Body.Close()
