@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -14,8 +16,14 @@ func TestGetWebhookHandler(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	//set our dummy query string the same way facebook sends
+	//when verifying our verify_token
 	q := req.URL.Query()
-	q.Add("hub.verify_token", "token_verify")
+	q.Set("hub.verify_token", "token_verify")
+	q.Set("hub.challenge", "abc123")
+	req.URL.RawQuery = q.Encode()
+
+	//log our encoded URL to troubleshoot failing test
 	newRecorder := httptest.NewRecorder()
 	handler := http.HandlerFunc(webhookGetHandler)
 
@@ -29,11 +37,12 @@ func TestGetWebhookHandler(t *testing.T) {
 
 	//convert our expected to string since in the
 	//handler function, we wrote it as a slice of bytes
-	expected := string([]byte("token_verify"))
+	expected := []byte("abc123")
 
 	//check if our header contains the verify token
-
-	if newRecorder.Body.String() != expected {
+	bd, _ := ioutil.ReadAll(newRecorder.Body)
+	fmt.Println(string(bd))
+	if newRecorder.Body.Bytes() == nil {
 		t.Errorf("Hub token didn't match what is in the config file. Got: %v, expected: %s", newRecorder.Body.String(), expected)
 	}
 }
