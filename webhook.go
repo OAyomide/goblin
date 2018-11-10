@@ -39,6 +39,16 @@ type CallSendApiResponse struct {
 	MessageID string `json:"message_id"`
 }
 
+/**
+* Our Error json struct
+ */
+type ErrorString struct {
+	Er string `json:"message"`
+}
+type ErrorMessageStruct struct {
+	Error ErrorString `json:"error"`
+}
+
 var tk config
 var v = getToken()
 var marshalError = json.Unmarshal([]byte(v), &tk)
@@ -122,7 +132,9 @@ func webhookPostHandler(w http.ResponseWriter, r *http.Request) {
 						SendMessage(messaging.Sender.ID, "Oops! Cant do that yet")
 						fmt.Println("Attachment. Cannot process")
 					} else if messaging.Message.Text != "" {
+						//contentParsed := parseContentFile()
 						SendMessage(messaging.Sender.ID, text)
+						ddg()
 					}
 
 				} else if messaging.Postback != nil {
@@ -163,7 +175,7 @@ func getUserProfile(userID string) string {
 
 	defer response.Body.Close()
 	res, _ := ioutil.ReadAll(response.Body)
-	fmt.Printf("All green! Got user profile: %v\n\n", string(res))
+	// fmt.Printf("All green! Got user profile: %v\n\n", string(res))
 	return string(res)
 }
 

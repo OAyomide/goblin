@@ -27,33 +27,33 @@ type MessageStruct struct {
 * We will then pass this to appropriate functions. For example: Reply a user
 **/
 
-func (c *MessageStruct) parseContentFile() *MessageStruct {
+func parseContentFile() string {
 	contentFile, err := ioutil.ReadFile("content.yml")
 	if err != nil {
 		log.Printf("Error opening content file: %s\n\n", err)
 		panic(err)
 	}
 
-	er := yaml.Unmarshal(contentFile, c)
+	er, _ := yaml.Marshal(contentFile)
 
 	if er != nil {
 		log.Printf("Couldnt marshal content file: %s\n\n", er)
 	}
-	return c
+	return string(er)
 }
 
-func getContents() string {
-	var c MessageStruct
+// func getContents() string {
+// 	var c MessageStruct
 
-	c.parseContentFile()
+// 	c.parseContentFile()
 
-	v, err := json.Marshal(c)
+// 	v, err := json.Marshal(c)
 
-	if err != nil {
-		log.Printf("Error marshalling our json file: %s\n", err)
-	}
-	return string(v)
-}
+// 	if err != nil {
+// 		log.Printf("Error marshalling our json file: %s\n", err)
+// 	}
+// 	return string(v)
+// }
 
 func (c *Config) readYml() *Config {
 	yamlFile, err := ioutil.ReadFile("bot.config.yml")
