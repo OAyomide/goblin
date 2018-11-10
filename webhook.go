@@ -134,7 +134,7 @@ func webhookPostHandler(w http.ResponseWriter, r *http.Request) {
 					} else if messaging.Message.Text != "" {
 						//contentParsed := parseContentFile()
 						SendMessage(messaging.Sender.ID, text)
-						ddg()
+						ddg(messaging.Sender.ID)
 					}
 
 				} else if messaging.Postback != nil {
