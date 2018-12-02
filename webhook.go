@@ -42,11 +42,56 @@ type CallSendApiResponse struct {
 /**
 * Our Error json struct
  */
+type Error struct {
+	message string `json:"message", omitempty`
+}
 type ErrorString struct {
-	Er string `json:"message"`
+	Er Error `json:"error"`
 }
 type ErrorMessageStruct struct {
 	Error ErrorString `json:"error"`
+}
+
+//======STRUCT FOR OUR BODY=======
+type Postbackstruct struct {
+	Payload string
+}
+
+type Payloadstruct struct {
+	URL      string
+	Reusable bool `json:"is_reusable"`
+}
+type Attachmentstruct struct {
+	Type    string
+	Payload Payloadstruct
+}
+type Messagestruct struct {
+	Text        string
+	Attachments []*Attachmentstruct
+}
+
+type Recipientstruct struct {
+	ID string
+}
+
+type Senderstruct struct {
+	ID string
+}
+type MessagingStruct struct {
+}
+type Body struct {
+	Object string
+	Entry  []struct {
+		ID        string
+		Time      int64
+		Messaging []struct {
+			Timestamp int64
+			Sender    Senderstruct
+			Recipient Recipientstruct
+			Message   *Messagestruct
+			Postback  *Postbackstruct
+		}
+	}
 }
 
 var tk config
@@ -72,45 +117,6 @@ func webhookGetHandler(w http.ResponseWriter, r *http.Request) {
 
 func webhookPostHandler(w http.ResponseWriter, r *http.Request) {
 
-	type Postbackstruct struct {
-		Payload string
-	}
-
-	type Payloadstruct struct {
-		URL      string
-		Reusable bool `json:"is_reusable"`
-	}
-	type Attachmentstruct struct {
-		Type    string
-		Payload Payloadstruct
-	}
-	type Messagestruct struct {
-		Text        string
-		Attachments []*Attachmentstruct
-	}
-
-	type Recipientstruct struct {
-		ID string
-	}
-
-	type Senderstruct struct {
-		ID string
-	}
-
-	type Body struct {
-		Object string
-		Entry  []struct {
-			ID        string
-			Time      int64
-			Messaging []struct {
-				Timestamp int64
-				Sender    Senderstruct
-				Recipient Recipientstruct
-				Message   *Messagestruct
-				Postback  *Postbackstruct
-			}
-		}
-	}
 	//we want to parse our request object
 	data, err := ioutil.ReadAll(r.Body)
 
@@ -133,6 +139,9 @@ func webhookPostHandler(w http.ResponseWriter, r *http.Request) {
 						fmt.Println("Attachment. Cannot process")
 					} else if messaging.Message.Text != "" {
 						//contentParsed := parseContentFile()
+						vr := hearStruct{text: text}
+						heard, rt := vr.listen(messaging.Sender.ID)
+						fmt.Printf("Heared:::%s %s", heard, rt)
 						SendMessage(messaging.Sender.ID, text)
 						ddg(messaging.Sender.ID)
 					}
@@ -144,6 +153,10 @@ func webhookPostHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 }
+
+// func handleTextMessage(h Body) {
+
+// }
 
 func callSendAPI(data []byte) {
 	accessToken := tk.AccessToken
@@ -157,8 +170,10 @@ func callSendAPI(data []byte) {
 	res, _ := ioutil.ReadAll(response.Body)
 	var rs CallSendApiResponse
 	json.Unmarshal([]byte(res), &rs)
-	fmt.Printf("The Message ID is: %s and recipient ID is: %s", rs.MessageID, rs.RecID)
-	fmt.Printf("Log of the transaction here!! Response: %s\n\n", string(res))
+
+	if rs.MessageID == "" {
+		fmt.Printf("Error with CallsendAPI here:%s", string(res))
+	}
 }
 
 func getUserProfile(userID string) string {
