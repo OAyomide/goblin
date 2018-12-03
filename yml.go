@@ -15,13 +15,6 @@ type Config struct {
 	AppSecret   string `yaml:"app_secret"`
 }
 
-type MessageStruct struct {
-	Welcome struct {
-		typing bool
-		text   string
-	}
-}
-
 /**
 * Here, we wan to parse the yml file retrieve our specified content file
 * We will then pass this to appropriate functions. For example: Reply a user

@@ -10,11 +10,11 @@ import (
 	"strings"
 )
 
-type config struct {
-	VerifyToken string
-	AccessToken string
-	AppSecret   string
-}
+// type config struct {
+// 	VerifyToken string
+// 	AccessToken string
+// 	AppSecret   string
+// }
 
 type TextReplystruct struct {
 	Text string `json:"text"`
@@ -94,9 +94,9 @@ type Body struct {
 	}
 }
 
-var tk config
+var tk Config
 var v = getToken()
-var marshalError = json.Unmarshal([]byte(v), &tk)
+var _ = json.Unmarshal([]byte(v), &tk)
 
 func webhookGetHandler(w http.ResponseWriter, r *http.Request) {
 
@@ -106,15 +106,18 @@ func webhookGetHandler(w http.ResponseWriter, r *http.Request) {
 	//the token gotten from our req object
 	tokenTrue := r.URL.Query().Get("hub.verify_token")
 	hubChallenge := r.URL.Query().Get("hub.challenge")
+
 	if tokenTrue == token {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte(hubChallenge))
 	} else {
+
 		fmt.Fprint(w, "Nay! Tokens don't match")
 	}
 }
 
+//+14172892061
 func webhookPostHandler(w http.ResponseWriter, r *http.Request) {
 
 	//we want to parse our request object
@@ -142,8 +145,8 @@ func webhookPostHandler(w http.ResponseWriter, r *http.Request) {
 						vr := hearStruct{text: text}
 						heard, rt := vr.listen(messaging.Sender.ID)
 						fmt.Printf("Heared:::%s %s", heard, rt)
-						SendMessage(messaging.Sender.ID, text)
-						ddg(messaging.Sender.ID)
+						// SendMessage(messaging.Sender.ID, text)
+						// ddg(messaging.Sender.ID)
 					}
 
 				} else if messaging.Postback != nil {
@@ -153,10 +156,6 @@ func webhookPostHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 }
-
-// func handleTextMessage(h Body) {
-
-// }
 
 func callSendAPI(data []byte) {
 	accessToken := tk.AccessToken

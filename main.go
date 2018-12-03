@@ -39,6 +39,9 @@ func getPort() string {
 	port := os.Getenv("PORT")
 
 	if port == "" {
+		/**
+		*TODO: get the port declared in the yml config.
+		*/
 		port = ":3500"
 		fmt.Printf("PORT NOT DEFINED. USING THE PORT %s as the running port\n", port)
 	}
