@@ -1,5 +1,9 @@
 package main
 
+import (
+	"fmt"
+)
+
 type hearStruct struct {
 	regex string
 	text  string
@@ -10,18 +14,24 @@ func hear(word string, userid string) string {
 		SendMessage(userid, "Hi there!!")
 		return "In this case, we'll trigger anything that will be handled when 'Hello' is triggered"
 	}
+
+	if word == "GET_STARTED" {
+		SendMessage(userid, "Hello there! Seems like this is the first time we're talking! Call me Go Goblin or maybe Goblonio")
+		return "GET STARTED TRIGGERED!!"
+	}
 	return ""
 }
 
-func (h *hearStruct) listen(userid string) (string, string) {
+func (h *hearStruct) listen(userid string) {
 	if h.text == "" && h.regex == "" {
-		return "", "Oops! Nothing to listen for"
+		panic("Oops! Nothing to listen for")
 	}
 
-	if h.regex != "" || h.text != "" {
+	if h.regex != "" {
 		hear(h.regex, userid)
+		fmt.Printf("REGEX PASSED:::%s\n\n", h.regex)
+	} else if h.text != "" {
 		hear(h.text, userid)
-		return h.regex, h.text
+		fmt.Printf("TEXT PASSED:::%s\n\n", h.text)
 	}
-	return "", ""
 }

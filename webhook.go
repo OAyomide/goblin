@@ -142,9 +142,10 @@ func webhookPostHandler(w http.ResponseWriter, r *http.Request) {
 						fmt.Println("Attachment. Cannot process")
 					} else if messaging.Message.Text != "" {
 						//contentParsed := parseContentFile()
+						fmt.Printf("THE USER ID IS::", messaging.Sender.ID)
 						vr := hearStruct{text: text}
-						heard, rt := vr.listen(messaging.Sender.ID)
-						fmt.Printf("Heared:::%s %s", heard, rt)
+						vr.listen(messaging.Sender.ID)
+						// fmt.Printf("Heared:::%s %s", heard, rt)
 						// SendMessage(messaging.Sender.ID, text)
 						// ddg(messaging.Sender.ID)
 					}
