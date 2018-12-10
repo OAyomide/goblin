@@ -20,6 +20,12 @@ func hear(word string, userid string) string {
 		return "GET STARTED TRIGGERED!!"
 	}
 	return ""
+
+	if word == "gallery" {
+		ddg(userid)
+		return "MEDIA QUERY"
+	}
+
 }
 
 func (h *hearStruct) listen(userid string) {
