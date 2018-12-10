@@ -94,6 +94,12 @@ type Body struct {
 	}
 }
 
+//the struct for our property --whitelist domaain, get started, etc
+type Properties struct {
+	property string
+	value    string
+}
+
 var tk Config
 var v = getToken()
 var _ = json.Unmarshal([]byte(v), &tk)
@@ -107,6 +113,8 @@ func webhookGetHandler(w http.ResponseWriter, r *http.Request) {
 	tokenTrue := r.URL.Query().Get("hub.verify_token")
 	hubChallenge := r.URL.Query().Get("hub.challenge")
 
+	//we want to call the function to set all these the things we are setting --get started button payload, etc
+	//setGetStartedPayload()
 	if tokenTrue == token {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
@@ -131,6 +139,7 @@ func webhookPostHandler(w http.ResponseWriter, r *http.Request) {
 	json.Unmarshal([]byte(data), &body)
 
 	if body.Object == "page" {
+		fmt.Printf("The whole object received::%v", data)
 		for _, entries := range body.Entry {
 			for _, messaging := range entries.Messaging {
 				if messaging.Message != nil {
@@ -142,7 +151,7 @@ func webhookPostHandler(w http.ResponseWriter, r *http.Request) {
 						fmt.Println("Attachment. Cannot process")
 					} else if messaging.Message.Text != "" {
 						//contentParsed := parseContentFile()
-						fmt.Printf("THE USER ID IS::", messaging.Sender.ID)
+						fmt.Printf("THE USER ID IS::%s", messaging.Sender.ID)
 						vr := hearStruct{text: text}
 						vr.listen(messaging.Sender.ID)
 						// fmt.Printf("Heared:::%s %s", heard, rt)
@@ -155,6 +164,8 @@ func webhookPostHandler(w http.ResponseWriter, r *http.Request) {
 				}
 			}
 		}
+	} else {
+		fmt.Printf("SEEMS LIKE THE POSTBACK OF THE GET STARTED BUTTON:: %v", data)
 	}
 }
 
@@ -203,4 +214,40 @@ func SendMessage(UserID string, text string) {
 	t := TextReplystruct{text}
 	send, _ := json.Marshal(Vertex{"RESPONSE", i, t})
 	callSendAPI(send)
+}
+
+func (c *Properties) setKeyValue() string {
+	vl := c.value
+	ppt := c.property
+	ty := map[string]string{vl: ppt}
+	return createKeyValuePairs(ty)
+}
+
+func createKeyValuePairs(val map[string]string) string {
+	v := new(bytes.Buffer)
+	for key, value := range val {
+		fmt.Fprintf(v, "\"%s:\"%s\"\n", key, value)
+	}
+	return v.String()
+}
+
+//we want to set various values for our bot
+//things like whitelisting the domain, setting the payload for get started, etc
+func setGetStartedPayload(data string, value string) {
+	accessToken := tk.AccessToken
+	//fn := Properties{value: ""}
+	//send the request
+	response, err := http.Post("https://graph.facebook.com/v3.1/me/messenger_profile?"+accessToken, "application/json", nil)
+
+	if err != nil {
+		fmt.Printf("Error setting get started payload here: %s", err.Error())
+	}
+
+	rs, err := ioutil.ReadAll(response.Body)
+
+	if err != nil {
+		fmt.Printf("Error parsing POST response here: %s", err.Error())
+	}
+
+	fmt.Printf("HERE IS THE RESPONSE AFTER MAKING POST REQUEST TO SET PAYLOAD: %s\n\n", string(rs))
 }
