@@ -54,7 +54,7 @@ type ErrorMessageStruct struct {
 
 //======STRUCT FOR OUR BODY=======
 type Postbackstruct struct {
-	Payload string
+	Payload string `json:"payload"`
 }
 
 type Payloadstruct struct {
@@ -89,15 +89,17 @@ type Body struct {
 			Sender    Senderstruct
 			Recipient Recipientstruct
 			Message   *Messagestruct
-			Postback  *Postbackstruct
+			Postback  *Postbackstruct `json:"postback"`
 		}
 	}
 }
 
-//the struct for our property --whitelist domaain, get started, etc
-type Properties struct {
-	property string
-	value    string
+type GetStarted struct {
+	Payload string `json:"payload"`
+}
+
+type getStartedButton struct {
+	GetS GetStarted `json:"get_started"`
 }
 
 var tk Config
@@ -113,8 +115,6 @@ func webhookGetHandler(w http.ResponseWriter, r *http.Request) {
 	tokenTrue := r.URL.Query().Get("hub.verify_token")
 	hubChallenge := r.URL.Query().Get("hub.challenge")
 
-	//we want to call the function to set all these the things we are setting --get started button payload, etc
-	//setGetStartedPayload()
 	if tokenTrue == token {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
@@ -139,7 +139,7 @@ func webhookPostHandler(w http.ResponseWriter, r *http.Request) {
 	json.Unmarshal([]byte(data), &body)
 
 	if body.Object == "page" {
-		fmt.Printf("The whole object received::%v", data)
+		fmt.Printf("The whole object received::%v\n\n", string(data))
 		for _, entries := range body.Entry {
 			for _, messaging := range entries.Messaging {
 				if messaging.Message != nil {
@@ -159,8 +159,12 @@ func webhookPostHandler(w http.ResponseWriter, r *http.Request) {
 						// ddg(messaging.Sender.ID)
 					}
 
-				} else if messaging.Postback != nil {
+				} else if messaging.Postback.Payload != "" {
 					fmt.Println("Yay! We have a postback event!")
+
+					if messaging.Postback.Payload == "GET_STARTED" {
+						SendMessage(messaging.Sender.ID, "Hello! It seems this is the first time we're talking! Call me Goblin!")
+					}
 				}
 			}
 		}
@@ -216,11 +220,9 @@ func SendMessage(UserID string, text string) {
 	callSendAPI(send)
 }
 
-func (c *Properties) setKeyValue() string {
-	vl := c.value
-	ppt := c.property
-	ty := map[string]string{vl: ppt}
-	return createKeyValuePairs(ty)
+func setKV(ppt string, val string) string {
+	rt := map[string]string{ppt: val}
+	return createKeyValuePairs(rt)
 }
 
 func createKeyValuePairs(val map[string]string) string {
@@ -231,13 +233,23 @@ func createKeyValuePairs(val map[string]string) string {
 	return v.String()
 }
 
-//we want to set various values for our bot
-//things like whitelisting the domain, setting the payload for get started, etc
-func setGetStartedPayload(data string, value string) {
+//set the get started payload for the GET_STARTED button
+func setGetStartedPayload(value string) {
 	accessToken := tk.AccessToken
-	//fn := Properties{value: ""}
+	fn := getStartedButton{
+		GetStarted{
+			Payload: value,
+		},
+	}
+
+	data, err := json.Marshal(fn)
+
+	if err != nil {
+		fmt.Print("Error marshalling GET STARTED")
+		panic(err)
+	}
 	//send the request
-	response, err := http.Post("https://graph.facebook.com/v3.1/me/messenger_profile?"+accessToken, "application/json", nil)
+	response, err := http.Post("https://graph.facebook.com/v3.1/me/messenger_profile?access_token="+accessToken, "application/json", bytes.NewBuffer(data))
 
 	if err != nil {
 		fmt.Printf("Error setting get started payload here: %s", err.Error())

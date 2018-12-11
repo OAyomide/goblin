@@ -15,6 +15,9 @@ func main() {
 
 	//decalre out port
 	port := getPort()
+	//we want to call the function to set all these the things we are setting --get started button payload, etc
+	setGetStartedPayload("GET_STARTED")
+
 	//declare the VERB OUR route takes
 	r.HandleFunc("/", indexHandler).Methods("GET")
 	r.HandleFunc("/webhook", webhookGetHandler).Methods("GET")
@@ -41,7 +44,7 @@ func getPort() string {
 	if port == "" {
 		/**
 		*TODO: get the port declared in the yml config.
-		*/
+		 */
 		port = ":3500"
 		fmt.Printf("PORT NOT DEFINED. USING THE PORT %s as the running port\n", port)
 	}

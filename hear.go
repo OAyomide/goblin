@@ -19,13 +19,13 @@ func hear(word string, userid string) string {
 		SendMessage(userid, "Hello there! Seems like this is the first time we're talking! Call me Go Goblin or maybe Goblonio")
 		return "GET STARTED TRIGGERED!!"
 	}
-	return ""
 
 	if word == "gallery" {
 		ddg(userid)
 		return "MEDIA QUERY"
 	}
 
+	return ""
 }
 
 func (h *hearStruct) listen(userid string) {
