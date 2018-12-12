@@ -8,10 +8,10 @@ The project assumes some ideas working with Golang and of course, big ❤️ wri
 
 ##### Short term TO-DO:
 
-1. [ ] Split into packages
+1. [x] Split into packages
 2. [ ] Allow bot listen for regex
 3. [ ] Support other messenger APIs (Typing indicator, Message read, etc)
 
 #
 
-###### Much love is appreciate and this project is quite more maintained than many other projects on github 😄
+###### Much love is appreciate and this project is quite more maintained than many other projects on my github 😄
