@@ -1,6 +1,7 @@
 package parser
 
 import (
+	"goblin/error"
 	"io/ioutil"
 	"log"
 	"path/filepath"
@@ -19,16 +20,14 @@ func ParseContentFile() string {
 	configFile := filepath.FromSlash("/content.yml")
 	contentFile, err := ioutil.ReadFile(configFile)
 
-	if err != nil {
-		log.Printf("Error opening content file: %s\n", err.Error())
-		panic(err)
-	}
+	Err := errorhandler.HandleErr
 
 	fl, err := yaml.Marshal(contentFile)
 
 	if err != nil {
 		log.Printf("Couldn't marshal content file: %s\n", err)
 	}
+	Err(err, "Couldn't marshal content file")
 	return string(fl)
 }
 
@@ -47,7 +46,7 @@ func (x *Configgg) ReadYml() *Configgg {
 		panic(err)
 	}
 
-	fl := yaml.Unmarshal(yamlFile, x)
+	fl := yaml.Unmarshal(yamlFile, &x)
 	if fl != nil {
 		log.Printf("ERROR MARSHALLING YAML FILE::%s", fl.Error())
 	}
