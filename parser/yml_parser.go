@@ -9,18 +9,20 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
+//Configgg is the struct for the config file we're parsing
 type Configgg struct {
 	VerifyToken string `yaml:"verify_token"`
 	AccessToken string `yaml:"access_token"`
 	AppSecret   string `yaml:"app_secret"`
 }
 
+//Err is a function that assigns error handler to the variable
+var Err = errorhandler.HandleErr
+
 //ParseContentFile parses the file and return the data
 func ParseContentFile() string {
 	configFile := filepath.FromSlash("/content.yml")
 	contentFile, err := ioutil.ReadFile(configFile)
-
-	Err := errorhandler.HandleErr
 
 	fl, err := yaml.Marshal(contentFile)
 
