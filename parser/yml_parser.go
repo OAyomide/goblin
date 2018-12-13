@@ -45,7 +45,6 @@ func (x *Configgg) ReadYml() *Configgg {
 	yamlFile, err := ioutil.ReadFile(configFile)
 	if err != nil {
 		log.Printf("ERROR READING THE CONFIG FILE: %s", err.Error())
-		panic(err)
 	}
 
 	fl := yaml.Unmarshal(yamlFile, &x)

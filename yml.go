@@ -24,7 +24,7 @@ func parseContentFile() string {
 	contentFile, err := ioutil.ReadFile("content.yml")
 	if err != nil {
 		log.Printf("Error opening content file: %s\n\n", err)
-		panic(err)
+		panic("ERROR OPENING CONTENT FILE" + err.Error())
 	}
 
 	er, _ := yaml.Marshal(contentFile)

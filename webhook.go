@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"goblin/parser"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -102,15 +103,13 @@ type getStartedButton struct {
 	GetS GetStarted `json:"get_started"`
 }
 
-var tk Config
-var v = getToken()
-var _ = json.Unmarshal([]byte(v), &tk)
+var t = parser.GetAccessToken()
 
 func webhookGetHandler(w http.ResponseWriter, r *http.Request) {
 
-	fmt.Printf("Here is the token! ==> %s\n", tk.VerifyToken)
+	fmt.Printf("Here is the token! ==> %s\n", t)
 
-	token := tk.VerifyToken
+	token := t
 	//the token gotten from our req object
 	tokenTrue := r.URL.Query().Get("hub.verify_token")
 	hubChallenge := r.URL.Query().Get("hub.challenge")
@@ -150,16 +149,12 @@ func webhookPostHandler(w http.ResponseWriter, r *http.Request) {
 						SendMessage(messaging.Sender.ID, "Oops! Cant do that yet")
 						fmt.Println("Attachment. Cannot process")
 					} else if messaging.Message.Text != "" {
-						//contentParsed := parseContentFile()
 						fmt.Printf("THE USER ID IS::%s", messaging.Sender.ID)
 						vr := hearStruct{text: text}
 						vr.listen(messaging.Sender.ID)
-						// fmt.Printf("Heared:::%s %s", heard, rt)
-						// SendMessage(messaging.Sender.ID, text)
-						// ddg(messaging.Sender.ID)
 					}
 
-				} else if messaging.Postback.Payload != "" {
+				} else if messaging.Postback != nil {
 					fmt.Println("Yay! We have a postback event!")
 
 					if messaging.Postback.Payload == "GET_STARTED" {
@@ -174,12 +169,13 @@ func webhookPostHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func callSendAPI(data []byte) {
-	accessToken := tk.AccessToken
+	//accessToken := tk.AccessToken
+	accessToken := t
 	response, err := http.Post("https://graph.facebook.com/v2.6/me/messages?access_token="+accessToken, "application/json", bytes.NewBuffer(data))
 
 	if err != nil {
 		log.Printf("Error here!! %s", err)
-		panic(err)
+		panic("CALLSEND API ERR:" + err.Error())
 	}
 
 	res, _ := ioutil.ReadAll(response.Body)
@@ -192,7 +188,8 @@ func callSendAPI(data []byte) {
 }
 
 func getUserProfile(userID string) string {
-	accessToken := tk.AccessToken
+	//accessToken := tk.AccessToken
+	accessToken := t
 
 	profileFields := []string{"first_name", "last_name", "name", "profile_pic"}
 	separatedUserFields := strings.Join(profileFields, ",")
@@ -203,12 +200,13 @@ func getUserProfile(userID string) string {
 		panic(err)
 	}
 
-	defer response.Body.Close()
 	res, _ := ioutil.ReadAll(response.Body)
 	// fmt.Printf("All green! Got user profile: %v\n\n", string(res))
+	//defer response.Body.Close()
 	return string(res)
 }
 
+//SendMessage is used to send the text to the user on messenger
 func SendMessage(UserID string, text string) {
 	userProfile := getUserProfile(UserID)
 	var prof Profile
@@ -235,7 +233,8 @@ func createKeyValuePairs(val map[string]string) string {
 
 //set the get started payload for the GET_STARTED button
 func setGetStartedPayload(value string) {
-	accessToken := tk.AccessToken
+
+	accessToken := t
 	fn := getStartedButton{
 		GetStarted{
 			Payload: value,
