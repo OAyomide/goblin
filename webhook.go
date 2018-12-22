@@ -163,6 +163,7 @@ func webhookPostHandler(w http.ResponseWriter, r *http.Request) {
 				}
 			}
 		}
+		w.WriteHeader(http.StatusOK)
 	} else {
 		fmt.Printf("SEEMS LIKE THE POSTBACK OF THE GET STARTED BUTTON:: %v", data)
 	}
